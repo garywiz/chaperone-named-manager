@@ -1,0 +1,3 @@
+[submodule "www/namedmanager"]
+	path = www/namedmanager
+	url = git@github.com:garywiz/namedmanager.git
