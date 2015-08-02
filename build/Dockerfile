@@ -7,4 +7,4 @@ ENV _PARENT_IMAGE="chapdev/chaperone-named-manager:latest"
 
 RUN /setup/build/install.sh
 
-PORT 8080 8443 8053/udp 8053/tcp
+EXPOSE 8080 8443 8053/udp 8053/tcp

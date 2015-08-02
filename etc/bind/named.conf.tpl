@@ -1,3 +1,9 @@
+$(CONFIG_FWD_OK:+
+acl goodclients { 
+   $(CONFIG_FWD_OK)
+};
+)
+
 options {
 	directory "$(VAR_DIR)/named-zones";
 
@@ -10,21 +16,30 @@ options {
 	// Uncomment the following block, and insert the addresses replacing 
 	// the all-0's placeholder.
 
-	// forwarders {
-	// 	0.0.0.0;
-	// };
+	recursion yes;
 
+	$(CONFIG_FWD_OK:+allow-query { goodclients; };)
+	$(CONFIG_FWD_HOST:+
+        forwarders { 
+	  $(CONFIG_FWD_HOST); 
+        };
+	forward only;
+        )
 	//========================================================================
 	// If BIND logs error messages about the root key being expired,
 	// you will need to update your keys.  See https://www.isc.org/bind-keys
 	//========================================================================
-	dnssec-validation auto;
+
+	//dnssec-validation auto;
+	dnssec-enable no;
+	dnssec-validation no;
 
 	auth-nxdomain no;    # conform to RFC1035
 	listen-on port 8053 { any; };
 	listen-on-v6 port 8053 { any; };
 
 	pid-file "$(VAR_DIR)/run/named.pid";
+	session-keyfile "$(VAR_DIR)/run/named-session.key";
 };
 
 include "$(APPS_DIR)/etc/bind/rndc.key";

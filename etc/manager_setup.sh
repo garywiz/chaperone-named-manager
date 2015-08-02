@@ -3,15 +3,21 @@
 sentinel=$APPS_DIR/var/run/manager.setup    # present if we've already initialized namedmanager
 NDM=$APPS_DIR/www/namedmanager	            # the namedmanager install directory
 
+# Always reprocess the config files so that config changes can be done at any time.
+
+mkdir -p $VAR_DIR/bind
+cd $APPS_DIR/etc/bind
+envcp --overwrite --strip=.tpl *.tpl $VAR_DIR/bind
+
+# This however is done only once for the data container
+
 if [ -f $sentinel ]; then
   exit
 fi
 
 date > $sentinel
 
-mkdir -p $VAR_DIR/bind $VAR_DIR/named-zones
-cd $APPS_DIR/etc/bind
-envcp --overwrite --strip=.tpl *.tpl $VAR_DIR/bind
+mkdir -p $VAR_DIR/named-zones
 
 if [ ! -f "$VAR_DIR/named-zones/named.namedmanager.conf" ]; then
   echo "" >$VAR_DIR/named-zones/named.namedmanager.conf

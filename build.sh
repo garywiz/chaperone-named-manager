@@ -7,10 +7,10 @@ if [ "$CHAP_SERVICE_NAME" != "" ]; then
   exit
 fi
 if [ $# != 1 ]; then
-  echo "Usage: ./build.sh <production-image-name>"
-  exit 1
+  prodimage="chapdev/chaperone-named-manager"
+else
+  prodimage="$1"
 fi
-prodimage="$1"
 if [ ! -f build/Dockerfile ]; then
   echo "Expecting to find Dockerfile in ./build ... not found!"
   exit 1
