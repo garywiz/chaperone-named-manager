@@ -14,13 +14,13 @@
 
 $apihost = getenv("CONFIG_APIHOST");
 
-if ($apihost == getenv("CONFIG_HOSTNAME")) {
+if ($apihost == getenv("CONFIG_EXT_HOSTNAME")) {
   $apihost = 'localhost:8443';
 }
 
-$config["api_url"]		    = "https://".$apihost;            // Application Install Location
-$config["api_server_name"]	= getenv("CONFIG_HOSTNAME");      // Name of the DNS server (important: part of the authentication process)
-$config["api_auth_key"]		= "ultrahighsecretkey";				   // API authentication key
+$config["api_url"]	        = "https://".$apihost;            // Application Install Location
+$config["api_server_name"]	= getenv("CONFIG_EXT_HOSTNAME");  // Name of the DNS server (important: part of the authentication process)
+$config["api_auth_key"]		= "ultrahighsecretkey";		  // API authentication key
 
 /*
 	Log file to find messages from Named. Note that:
