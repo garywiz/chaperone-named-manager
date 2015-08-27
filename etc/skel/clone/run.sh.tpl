@@ -5,9 +5,6 @@
 IMAGE="%(PARENT_IMAGE)"
 INTERACTIVE_SHELL="/bin/bash"
 
-# Uncomment to include port settings
-#PORTOPT="-p x:y"
-
 EXT_HOSTNAME=localhost
 
 # Uncomment to hardcode ports for startup.  Command line still overrides.
@@ -32,11 +29,14 @@ cd ..
 options="-t -i -e TERM=$TERM --rm=true"
 shellopt="/bin/bash --rcfile $APPS/bash.bashrc"
 
-while getopts ":-dp:" o; do
+while getopts ":-dp:n:" o; do
   case "$o" in
     d)
       options="-d"
       shellopt=""
+      ;;
+    n)
+      options="$options --name $OPTARG"
       ;;
     p)
       PORTOPT="-p $OPTARG"
