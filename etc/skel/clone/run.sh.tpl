@@ -12,12 +12,14 @@ INTERACTIVE_SHELL="/bin/bash"
 EXT_HOSTNAME=%(CONFIG_EXT_HOSTNAME:-localhost)
 EXT_HTTP_PORT=%(CONFIG_EXT_HTTP_PORT:-8080)
 EXT_HTTPS_PORT=%(CONFIG_EXT_HTTPS_PORT:-8443)
+EXT_DNS_PORT=%(CONFIG_EXT_DNS_PORT:-8053)
 
 # Uncomment to enable SSL and specify the certificate hostname
 #EXT_SSL_HOSTNAME=secure.example.com
 
 PORTOPT="-p $EXT_HTTP_PORT:8080 -e CONFIG_EXT_HTTP_PORT=$EXT_HTTP_PORT \
-         -p $EXT_HTTPS_PORT:8443 -e CONFIG_EXT_HTTPS_PORT=$EXT_HTTPS_PORT"
+         -p $EXT_HTTPS_PORT:8443 -e CONFIG_EXT_HTTPS_PORT=$EXT_HTTPS_PORT \
+         -p $EXT_DNS_PORT:8053/udp -p $EXT_DNS_PORT:8053/tcp -e CONFIG_EXT_DNS_PORT=$EXT_DNS_PORT"
 
 usage() {
   echo "Usage: run.sh [-d] [-p port#] [-h] [extra-chaperone-options]"

@@ -13,7 +13,7 @@
 // http entry to index.php redirects to https.  However, if https is on a different port,
 // specify it here.
 
-$config["https_port"] = getenv("CONFIG_EXT_HTTPD_PORT")? ':'.getenv("CONFIG_EXT_HTTPD_PORT") : ":8443";
+$config["https_port"] = getenv("CONFIG_EXT_HTTPS_PORT")? ':'.getenv("CONFIG_EXT_HTTPS_PORT") : ":8443";
 
 /* Allows you to override the normal "NamedManager" graphic at the top of the page (for normal
    users who don't actually know what Named actually is). */

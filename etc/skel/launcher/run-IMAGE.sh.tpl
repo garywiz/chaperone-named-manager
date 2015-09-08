@@ -29,8 +29,9 @@ CONFIG_MANAGER=true		# enable the web-based configuration manager (also enables 
 EXT_HOSTNAME=%(CONFIG_EXT_HOSTNAME:-localhost)
 EXT_HTTP_PORT=%(CONFIG_EXT_HTTP_PORT:-8080)
 EXT_HTTPS_PORT=%(CONFIG_EXT_HTTPS_PORT:-8443)
+EXT_DNS_PORT=%(CONFIG_EXT_DNS_PORT:-8053)
 
-PORTOPT="-p $EXT_HTTP_PORT:8080 -p $EXT_HTTPS_PORT:8443"
+PORTOPT="-p $EXT_HTTP_PORT:8080 -p $EXT_HTTPS_PORT:8443 -p $EXT_DNS_PORT:8053/tcp -p $EXT_DNS_PORT:8053/udp"
 
 # If this directory exists and is writable, then it will be used
 # as attached storage
