@@ -7,8 +7,4 @@ echo ""
 echo "Now running inside container. Directory is: $APPS_DIR"
 echo ""
 
-if [ "$EXTERN_HOSTPORT" != "" -a "$HTTPD_SERVER_NAME" != "" ]; then
-  echo "The default '$HTTPD_SERVER_NAME' site is running at http://$EXTERN_HOSTPORT/"
-  echo ""
-fi
-
+echo "The default '$HTTPD_SERVER_NAME' site is running at http://$CONFIG_EXT_SSL_HOSTNAME:$CONFIG_EXT_HTTPS_PORT/"

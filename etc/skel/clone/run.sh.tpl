@@ -5,10 +5,19 @@
 IMAGE="%(PARENT_IMAGE)"
 INTERACTIVE_SHELL="/bin/bash"
 
-EXT_HOSTNAME=localhost
+# You can specify the external host and ports for your webserver here.  These variables
+# are also passed into the container so that any application code which does redirects
+# can use these if need be.
 
-# Uncomment to hardcode ports for startup.  Command line still overrides.
-#PORTOPT="-p x:y -p x:y"
+EXT_HOSTNAME=%(CONFIG_EXT_HOSTNAME:-localhost)
+EXT_HTTP_PORT=%(CONFIG_EXT_HTTP_PORT:-8080)
+EXT_HTTPS_PORT=%(CONFIG_EXT_HTTPS_PORT:-8443)
+
+# Uncomment to enable SSL and specify the certificate hostname
+#EXT_SSL_HOSTNAME=secure.example.com
+
+PORTOPT="-p $EXT_HTTP_PORT:8080 -e CONFIG_EXT_HTTP_PORT=$EXT_HTTP_PORT \
+         -p $EXT_HTTPS_PORT:8443 -e CONFIG_EXT_HTTPS_PORT=$EXT_HTTPS_PORT"
 
 usage() {
   echo "Usage: run.sh [-d] [-p port#] [-h] [extra-chaperone-options]"
@@ -51,33 +60,14 @@ while getopts ":-dp:n:" o; do
 done
 shift $((OPTIND-1))
 
-# remap ports according to the image, and tell the container about the lowest numbered
-# port used.
-
-if [ "$PORTOPT" == "" ]; then
-  exposed=`docker inspect $IMAGE | sed -ne 's/^ *"\([0-9]*\)\/tcp".*$/\1/p' | sort -u`
-  ncprog=`which nc`
-  if [ "$exposed" != "" -a "$ncprog" != "" ]; then
-    PORTOPT=""
-    for PORT in $exposed; do
-      if ! $ncprog -z $EXT_HOSTNAME $PORT; then
-	 [ "$PORTOPT" == "" ] && PORTOPT="--env CONFIG_EXT_PORT=$PORT"
-         PORTOPT="$PORTOPT -p $PORT:$PORT"
-	 echo "Port $PORT available at $EXT_HOSTNAME:$PORT ..."
-      fi
-    done
-  else
-    if [ "$exposed" != "" ]; then
-      echo "Note: '/bin/nc' not installed, so cannot detect port usage on this system."
-      echo "      Use '$0 -p x:y' to expose ports."
-    fi
-  fi
-fi
-
 # Run the image with this directory as our local apps dir.
 # Create a user with a uid/gid based upon the file permissions of the chaperone.d
 # directory.
 
 MOUNT=${PWD#/}; MOUNT=/${MOUNT%%/*} # extract user mountpoint
-docker run $options -v $MOUNT:$MOUNT $PORTOPT --env CONFIG_EXT_HOSTNAME=$EXT_HOSTNAME $IMAGE \
+
+docker run $options -v $MOUNT:$MOUNT $PORTOPT \
+   -e CONFIG_EXT_HOSTNAME="$EXT_HOSTNAME" \
+   -e CONFIG_EXT_SSL_HOSTNAME="$EXT_SSL_HOSTNAME" \
+   $IMAGE \
    --create $USER:$APPS/chaperone.d --config $APPS/chaperone.d $* $shellopt

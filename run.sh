@@ -1,34 +1,55 @@
 #!/bin/bash
-#Created by chaplocal on Mon Jul 13 11:11:00 AEST 2015
+#Developer's startup script
+#Created by chaplocal on Mon Sep  7 03:21:06 UTC 2015
 
-IMAGE="chapdev/chaperone-named-manager:latest"
-DOCKERHOST=`hostname`
+IMAGE="chapdev/chaperone-named-manager"
+INTERACTIVE_SHELL="/bin/bash"
 
-HTTPD_PORT=443
-HTTP_PORT=80
-BIND_PORT=53
+# You can specify the external host and ports for your webserver here.  These variables
+# are also passed into the container so that any application code which does redirects
+# can use these if need be.
 
-PORTOPT="-p $HTTP_PORT:8080 -p $HTTPD_PORT:8443 -p $BIND_PORT:8053/udp -p $BIND_PORT:8053/tcp"
+EXT_HOSTNAME=localhost
+EXT_HTTP_PORT=8080
+EXT_HTTPS_PORT=8443
+
+CONFIG_PHPMYADMIN=true
+
+# Uncomment to enable SSL and specify the certificate hostname
+#EXT_SSL_HOSTNAME=secure.example.com
+
+PORTOPT="-p $EXT_HTTP_PORT:8080 -e CONFIG_EXT_HTTP_PORT=$EXT_HTTP_PORT \
+         -p $EXT_HTTPS_PORT:8443 -e CONFIG_EXT_HTTPS_PORT=$EXT_HTTPS_PORT \
+         -e CONFIG_PHPMYADMIN=$CONFIG_PHPMYADMIN \
+"
 
 usage() {
   echo "Usage: run.sh [-d] [-p port#] [-h] [extra-chaperone-options]"
   echo "       Run $IMAGE as a daemon or interactively (the default)."
-  echo "       First available port will be remapped to $DOCKERHOST if possible."
+  echo "       First available port will be remapped to $EXT_HOSTNAME if possible."
   exit
 }
+
+if [ "$CHAP_SERVICE_NAME" != "" ]; then
+  echo run.sh should be executed on your docker host, not inside a container.
+  exit
+fi
 
 cd ${0%/*} # go to directory of this file
 APPS=$PWD
 cd ..
 
-options="-t -i -e TERM=$TERM --rm=true -e CONFIG_EXT_HTTPD_PORT=$HTTPD_PORT"
+options="-t -i -e TERM=$TERM --rm=true"
 shellopt="/bin/bash --rcfile $APPS/bash.bashrc"
 
-while getopts ":-dp:" o; do
+while getopts ":-dp:n:" o; do
   case "$o" in
     d)
       options="-d"
       shellopt=""
+      ;;
+    n)
+      options="$options --name $OPTARG"
       ;;
     p)
       PORTOPT="-p $OPTARG"
@@ -43,30 +64,14 @@ while getopts ":-dp:" o; do
 done
 shift $((OPTIND-1))
 
-# remap ports according to the image, and tell the container about the lowest numbered
-# port used.
-
-if [ "$PORTOPT" == "" ]; then
-  exposed=`docker inspect $IMAGE | sed -ne 's/^ *"\([0-9]*\)\/tcp".*$/\1/p' - | sort -u`
-  if [ "$exposed" != "" -a -x /bin/nc ]; then
-    PORTOPT=""
-    for PORT in $exposed; do
-      if ! /bin/nc -z $DOCKERHOST $PORT; then
-	 [ "$PORTOPT" == "" ] && PORTOPT="--env EXTERN_HOSTPORT=$DOCKERHOST:$PORT"
-         PORTOPT="$PORTOPT -p $PORT:$PORT"
-	 echo "Port $PORT available at $DOCKERHOST:$PORT ..."
-      fi
-    done
-  fi
-fi
-
-# Extract our local UID/GID
-myuid=`id -u`
-mygid=`id -g`
-
 # Run the image with this directory as our local apps dir.
-# Create a user with uid=$myuid inside the container so the mountpoint permissions
-# are correct.
+# Create a user with a uid/gid based upon the file permissions of the chaperone.d
+# directory.
 
-docker run $options -v /home:/home $PORTOPT $IMAGE \
-   --create $USER/$myuid --config $APPS/chaperone.d $* $shellopt
+MOUNT=${PWD#/}; MOUNT=/${MOUNT%%/*} # extract user mountpoint
+
+docker run $options -v $MOUNT:$MOUNT $PORTOPT \
+   -e CONFIG_EXT_HOSTNAME="$EXT_HOSTNAME" \
+   -e CONFIG_EXT_SSL_HOSTNAME="$EXT_SSL_HOSTNAME" \
+   $IMAGE \
+   --create $USER:$APPS/chaperone.d --config $APPS/chaperone.d $* $shellopt

@@ -7,16 +7,28 @@
 IMAGE="%(PARENT_IMAGE)"
 INTERACTIVE_SHELL="/bin/bash"
 
-# You can specify the external host and ports for Apache here.  These variables
-# are also passed into the container so that any application code which does redirects
-# can use these if need be.
+#
+# NamedManager Application configuration
+#
+
+CONFIG_BIND=true		# enable Bind9
+CONFIG_MANAGER=true		# enable the web-based configuration manager (also enables Apache/MySQL)
+
+#
+# For a secondary nameserver, you should set CONFIG_MANAGER to "false", then set the
+# following variable to point to the host where the manager is running.  The port is optional
+# and defaults to port 80 if not present.
+#
+
+#CONFIG_APIHOST=ns1.namedmanager.com:81
+
+# You can specify the external host and ports for the web server here.  The server always
+# runs using SSL, and if you have custom certificates, you will need to match the external
+# hostname to the certificates.  By default, self-signed certificates are generated.
 
 EXT_HOSTNAME=%(CONFIG_EXT_HOSTNAME:-localhost)
 EXT_HTTP_PORT=%(CONFIG_EXT_HTTP_PORT:-8080)
 EXT_HTTPS_PORT=%(CONFIG_EXT_HTTPS_PORT:-8443)
-
-# Uncomment to enable SSL and specify the certificate hostname
-#EXT_SSL_HOSTNAME=secure.example.com
 
 PORTOPT="-p $EXT_HTTP_PORT:8080 -p $EXT_HTTPS_PORT:8443"
 
@@ -38,9 +50,11 @@ fi
 docker_opt="$docker_opt \
   -e CONFIG_EXT_HOSTNAME=$EXT_HOSTNAME \
   -e CONFIG_EXT_HTTPS_PORT=$EXT_HTTPS_PORT \
-  -e CONFIG_EXT_HTTP_PORT=$EXT_HTTP_PORT"
-
-[ "$EXT_SSL_HOSTNAME" != "" ] && docker_opt="$docker_opt -e CONFIG_EXT_SSL_HOSTNAME=$EXT_SSL_HOSTNAME"
+  -e CONFIG_EXT_HTTP_PORT=$EXT_HTTP_PORT \
+  -e CONFIG_BIND=$CONFIG_BIND \
+  -e CONFIG_MANAGER=$CONFIG_MANAGER \
+  -e CONFIG_APIHOST=$CONFIG_APIHOST \
+"
 
 if [ "$STORAGE_LOCATION" != "" -a -d "$STORAGE_LOCATION" -a -w "$STORAGE_LOCATION" ]; then
   docker_opt="$docker_opt -v $STORAGE_LOCATION:/apps/var"

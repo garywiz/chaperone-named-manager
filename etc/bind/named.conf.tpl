@@ -38,7 +38,7 @@ options {
 	listen-on port 8053 { any; };
 	listen-on-v6 port 8053 { any; };
 
-	pid-file "$(VAR_DIR)/run/named.pid";
+	pid-file "/tmp/named.pid";
 	session-keyfile "$(VAR_DIR)/run/named-session.key";
 };
 

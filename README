@@ -1,3 +1,5 @@
+This container implements Jethro Carr's NamedManager.
+
 This is a self-contained system directory managed by Chaperone.
 
 Everything is here: configuration, log files, user data.
