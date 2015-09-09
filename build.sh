@@ -9,7 +9,7 @@ if [ "$CHAP_SERVICE_NAME" != "" ]; then
 fi
 
 # Uncomment to default to your new derivative image name...
-prodimage="chapdev/chaperone-named-manager"
+prodimage="garywiz/chaperone-named-manager"
 
 [ "$1" != "" ] && prodimage="$1"
 
