@@ -61,7 +61,6 @@ docker_opt="$docker_opt \
   -e CONFIG_BIND=$CONFIG_BIND \
   -e CONFIG_MANAGER=$CONFIG_MANAGER \
   -e CONFIG_APIHOST=$CONFIG_APIHOST \
-  -e CONFIG_FWD_OK=$CONFIG_FWD_OK \
   -e CONFIG_FWD_HOST=$CONFIG_FWD_HOST \
 "
 
@@ -71,4 +70,4 @@ if [ "$STORAGE_LOCATION" != "" -a -d "$STORAGE_LOCATION" -a -w "$STORAGE_LOCATIO
   echo Using attached storage at $STORAGE_LOCATION
 fi
 
-docker run $docker_opt $IMAGE $chap_opt $* $INTERACTIVE_SHELL
+docker run $docker_opt -e CONFIG_FWD_OK="$CONFIG_FWD_OK" $IMAGE $chap_opt $* $INTERACTIVE_SHELL
