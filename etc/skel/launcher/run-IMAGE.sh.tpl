@@ -33,6 +33,12 @@ EXT_DNS_PORT=%(CONFIG_EXT_DNS_PORT:-8053)
 
 PORTOPT="-p $EXT_HTTP_PORT:8080 -p $EXT_HTTPS_PORT:8443 -p $EXT_DNS_PORT:8053/tcp -p $EXT_DNS_PORT:8053/udp"
 
+# Include the networks you want to allow to access this DNS server
+#CONFIG_FWD_OK="192.168.200.0/24; 10.0.0.0/16; localhost; localnets;"
+
+# If you want to forward all unanswered queries to another server, indicate here
+#CONFIG_FWD_HOST="192.168.0.8"
+
 # If this directory exists and is writable, then it will be used
 # as attached storage
 STORAGE_LOCATION="$PWD/%(IMAGE_BASENAME)-storage"
@@ -55,6 +61,8 @@ docker_opt="$docker_opt \
   -e CONFIG_BIND=$CONFIG_BIND \
   -e CONFIG_MANAGER=$CONFIG_MANAGER \
   -e CONFIG_APIHOST=$CONFIG_APIHOST \
+  -e CONFIG_FWD_OK=$CONFIG_FWD_OK \
+  -e CONFIG_FWD_HOST=$CONFIG_FWD_HOST \
 "
 
 if [ "$STORAGE_LOCATION" != "" -a -d "$STORAGE_LOCATION" -a -w "$STORAGE_LOCATION" ]; then
